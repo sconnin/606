@@ -1,0 +1,189 @@
+---
+title: "Data 606-Lab 1: Intro to R"
+author: "Sean Connin"
+date: "`r Sys.Date()`"
+output: openintro::lab_report
+---
+
+```{r load-packages, message=FALSE}
+library(tidyverse)
+library(openintro)
+```
+
+### Exercise 1
+
+```{r view-girls-counts}
+arbuthnot$girls
+
+ggplot(data=arbuthnot, aes(x=year, y=girls))+geom_point()
+
+
+
+```
+
+
+### Exercise 2
+
+The number of girls baptized each year declined during the period 1640 and 1660 (to < 3000) before increasing again to levels >7000 after 1680. 
+
+This pattern is apparent in the annual counts for boy baptisms as well. 
+
+Annual boys:girls counts vary (without obvious temporal pattern) between 1.04 and 1.16 over the same time-span. More boys are baptized each year than girls. 
+  
+
+```{r trend-girls}
+arbuthnot$boys+arbuthnot$girls
+
+# create new column to sum boys + girls count by year
+
+arbuthnot <- arbuthnot%>%mutate(total=girls+boys)
+
+# create scatterplot of total baptism counts by year
+
+ggplot(data=arbuthnot, aes(x=year, y=total))+geom_line()
+
+#create scatterplot of baptism counts (boys) by year
+
+ggplot(data=arbuthnot, aes(x=year, y=boys))+geom_line()
+
+#create scatterplot of baptism counts (girls) count by year
+
+ggplot(data=arbuthnot, aes(x=year, y=girls))+geom_line()
+
+# create new tbl column with ratio boys:girls
+
+arbuthnot<- arbuthnot%>%mutate(boy_to_girl_ratio=boys/girls)
+
+#create scatterplot for the ratio of boy:girl baptism counts by year
+
+ggplot(data=arbuthnot, aes(x=year, y=boy_to_girl_ratio))+geom_point()
+
+# create new tbl column for the ratio of boy baptisms (to total) each year
+
+arbuthnot <- arbuthnot%>%mutate(boy_ratio=boys/total)
+
+
+```
+
+
+### Exercise 3
+
+It is difficult to discern a obvious trend(s) in the proportion of boys born over time. This owes, in part, to high inter-annual variation. 
+
+Note: I don't believe we have established that baptism counts accurately track male/female births year-to-year.  
+
+```{r plot-prop-boys-arbuthnot}
+
+
+#create scatterplot for the ratio of boy baptism counts (to total) each year
+
+ggplot(data=arbuthnot, aes(x=year, y=boy_ratio))+geom_point()
+
+# evaluate number of births of boys relative to girls each year (see also: Exercise 2)
+
+arbuthnot<- arbuthnot%>%mutate(more_boys=boys>girls)
+
+# find the min and max count for boys
+
+arbuthnot%>%summarize(min=min(boys), max=max(boys))
+```
+
+
+### Exercise 4
+
+Included Years: 1940-202
+
+DF dimensions: 63 rows, 3 cols
+
+Column names: year, boys, girls
+
+```{r dim-present}
+
+#preview data set
+
+present
+
+# return years column
+
+present$year
+
+# return dataframe dimensions
+
+dim(present)
+
+# return column names
+
+names(present)
+
+
+```
+
+### Exercise 5
+
+Annual birth counts in the 'Present' data set are several orders of magnitude greater than annual baptism counts included in the Arbuthnot data set. 
+
+Each data set covers a similar period of time, ~60 yrs. 
+
+In the 'Present' data set, total birth counts increased by 1661327 between 1940 & 2002. Interim trends in birth counts were equivalent for boys and girls. 
+
+There was notable, but temporary, decline in birth rates that culminated in the mid-70s. I speculate that this may related to economic stresses related to the oil crisis, etc. 
+
+```{r count-compare}
+
+# return max and min birth counts for boys and girls over period of record
+
+present%>%pivot_longer(cols=c(boys, girls), names_to = 'gender', values_to ='value')%>%group_by(gender)%>%summarize(min=min(value), max=max(value))
+
+# plot birth count of boys vs girls by year
+
+plot_gender <- present%>%pivot_longer(cols=c(boys, girls), names_to = 'gender', values_to ='count')
+
+ggplot(plot_gender, aes(x=year, y=count, color=gender)) +geom_line()
+
+
+# create new column for total birth counts, plot counts by year, return difference in total count between 1940 & 2002
+
+present <- present%>%mutate(total=girls+boys)
+
+plot_total <- ggplot(data=present, aes(x=year, y=total))+geom_line()
+
+present$total%>%last()-present$total%>%first()
+
+
+
+
+
+
+```
+
+
+### Exercise 6
+
+Arbuthnot's observation that boys are born in greater proportion than girls in the U.S. does hold true in the 'Present' dataset.
+
+The offset in boy and girl birth counts (relative to total) is similar in magnitude across data sets. 
+
+However in the 'Present' data set, the proportion of male births (relative to total) decreases over time, while the opposite is true for females.
+
+```{r plot-prop-boys-present}
+
+# create new column with ratio of boys:total births by year, repeat  for girls, plot ratios for each gender.
+
+present<- present%>%mutate(ratio_boys=boys/total)%>%mutate(ratio_girls=girls/total)
+
+plot_ratio <- present%>%pivot_longer(cols=c(ratio_boys, ratio_girls), names_to = 'gender', values_to ='ratio_to_total')
+
+ggplot(plot_ratio, aes(x=year, y=ratio_to_total, color=gender))+geom_line()
+```
+
+
+### Exercise 7
+
+The greatest total number of births in the U.S. (for the period of record) occurred in 1961.
+
+```{r find-max-total}
+
+present %>%arrange(desc(total))
+
+```
+

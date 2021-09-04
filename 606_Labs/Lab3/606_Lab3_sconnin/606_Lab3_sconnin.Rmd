@@ -1,0 +1,149 @@
+---
+title: "Data606_Lab3"
+author: "Sean Connin"
+date: "`r Sys.Date()`"
+output: openintro::lab_report
+---
+
+```{r load-packages, message=FALSE}
+library(tidyverse)
+library(openintro)
+```
+
+### Exercise 1
+
+What does a streak length of 1 mean, i.e. how many hits and misses are in a streak of 1? What about a streak length of 0?
+
+*<span style="color: blue;">A streak of length 1 means that Kobe made a shot in which his previous shot missed as well as his following shot. For example, M|HM|</span>*
+
+*<span style="color: blue;">A streak of length 0 suggests that he had a miss that was preceded by a miss. For example, M|M. Each consecutive miss would count as a streak length of 0</span>*
+
+```{r code-chunk-label}
+
+
+# Evaluation of Kobe's streak lengths
+
+kobe_streak <- calc_streak(kobe_basket$shot)
+
+summary(kobe_streak)
+
+ggplot(data = kobe_streak, aes(x = length)) +
+  geom_bar()
+```
+
+### Exercise 2
+
+Describe the distribution of Kobe’s streak lengths from the 2009 NBA finals. What was his typical streak length? How long was his longest streak of baskets? Make sure to include the accompanying plot in your answer.
+
+*<span style="color: blue;">The distribution of Kobe's streaks is right skewed and unimodal.</span>*
+
+*<span style="color: blue;">Kobe's typical streak length was 0 based on count frequency.</span>* 
+
+*<span style="color: blue;">Kobe's longest streak was 4 consecutive shots made in a row.</span>*
+
+*See previous graph*
+
+
+### Exercise 3. 
+
+In your simulation of flipping the unfair coin 100 times, how may flips came up heads. 
+
+*<span style="color: blue;">Drawing on the code below: the count for heads after 100 simulations was 23.</span>*
+```{r}
+
+
+coin_outcomes <-c("heads", "tails")
+sample(coin_outcomes, size=1, replace=TRUE)
+set.seed(1966)
+sim_fair_coin<-sample(coin_outcomes, size=100, replace=TRUE, prob = c(0.2,0.8))
+sim_fair_coin
+table(sim_fair_coin)
+   
+```
+### Exercise 4. 
+
+Simulating a basketball player who has independent shots uses the same mechanism that you used to simulate a coin flip. 
+
+What change needs to be made to the sample function so that it reflects a shooting percentage of 45%?
+
+*<span style="color: blue;">Answer: we need to include the prob argument in our sample function.</span>*
+```{r}
+# simulate the independent shooter
+
+shot_outcomes <-c("H","M")
+set.seed(1964) 
+sim_basket <- sample(shot_outcomes, size=133, replace=TRUE)
+sim_basket
+(table(sim_basket))
+ 
+
+# simulate Kobe's shooting percentages
+
+shot_outcomes <- c("H", "M")
+set.seed(1968) 
+sim_basket <- sample(shot_outcomes, size = 133, replace = TRUE, prob = c(.45,.55))
+sim_basket
+(table(sim_basket))
+
+```
+### Exercise 5. 
+
+Using calc_streak, compute the streak lengths of sim_basket, and save the results in a data frame called sim_streak.
+```{r}
+
+sim_bask<- as.data.frame(sim_basket)%>%rename("shots"=sim_basket)
+
+sim_streak <- calc_streak(sim_bask$shots)
+
+summary(sim_streak)
+
+
+```
+
+### Exercise 6.
+
+Describe the distribution of streak lengths. 
+
+What is the typical streak length for this simulated independent shooter with a 45% shooting percentage? 
+
+*<span style="color: blue;">The typical streak length for the simulated independent shooter is 0.</span>*
+
+How long is the player’s longest streak of baskets in 133 shots? 
+
+*<span style="color: blue;">The simulated player's longest consecutive streak is 6 shots.</span>*
+
+```{r}
+
+#plot simulated players streak lengths
+
+ggplot(data = sim_streak, aes(x = length)) +
+  geom_bar()
+
+
+```
+### Exercise 7. 
+
+If you were to run the simulation of the independent shooter a second time, how would you expect its streak distribution to compare to the distribution from the question above? 
+
+Exactly the same? Somewhat similar? Totally different? Explain your reasoning.
+
+*<span style="color: blue;">I expect there to be some variation in the results (length counts) due to the fact that the model is probabilistic.</span>* 
+
+*<span style="color: blue;">In other words, the calc_streak function draws on random numbers and, as a result, does not return a single (deterministic) solution.</span>*
+
+*<span style="color: blue;">I expect the overall shape of the distribution would be consistent between runs.</span>* 
+
+### Exercise 8. 
+
+How does Kobe Bryant’s distribution of streak lengths compare to the distribution of streak lengths for the simulated shooter? 
+
+*<span style="color: blue;">They are very similar in terms of the counts, range of streak lengths, and shape of the distribution.</span>*  
+
+Using this comparison, do you have evidence that the hot hand model fits Kobe’s shooting patterns? Explain.
+
+*<span style="color: blue;">Based on the comparison here, I do not find evidence that the hot hand model fits Kobe's shooting patterns.</span>*
+
+*<span style="color: blue;">If the model was correct, I would expect that the count & length of shooting streaks would track in a positive manner. I would also expect that Kobe's shooting streaks would, on average, be longer than those produced by the simulated independent shooter.</span>*
+
+
+
